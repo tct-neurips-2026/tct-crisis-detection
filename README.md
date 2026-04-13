@@ -151,6 +151,17 @@ Reproduces: SS-Linear (linear ε decay) and SS-Exp (exponential ε decay) vs TCT
 
 ---
 
+### Appendix F: Multi-prefix Comparison
+
+```bash
+python experiments/08_multi_prefix_experiment.py
+```
+
+Reproduces Table 8: Multi-prefix vs. TCT-GRU 
+vs. Full-GRU. Note: ~50× slower than TCT 
+per update step.
+
+
 ## Expected Results (Table 1, Normal vs Emergency)
 
 | T  | TCT-GRU       | Full-GRU      | Mean-pool | Δ      |
