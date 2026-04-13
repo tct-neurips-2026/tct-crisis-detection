@@ -23,7 +23,8 @@ tct-crisis-detection/
 │   ├── 04_llm_experiment.py        # TCT-LLM, Full-LLM (Qwen2.5-3B, QLoRA)
 │   ├── 05_scheduled_sampling.py    # Scheduled Sampling comparison (Appendix E)
 │   ├── 06_curriculum_fixed.py      # Curriculum-GRU, Fixed-T5-GRU (Appendix C)
-│   └── 07_qwen_05b_fp16.py         # Qwen2.5-0.5B fp16 ablation (Appendix D)
+│   ├── 07_qwen_05b_fp16.py         # Qwen2.5-0.5B fp16 ablation (Appendix D)
+│   └── 08_multi_prefix_experiment.py  # Multi-prefix baseline (Appendix F)
 ├── data/
 │   └── README.md                   # Data download instructions
 ├── requirements.txt
@@ -149,18 +150,17 @@ python experiments/05_scheduled_sampling.py
 
 Reproduces: SS-Linear (linear ε decay) and SS-Exp (exponential ε decay) vs TCT-GRU and Full-GRU.
 
----
-
-### Appendix F: Multi-prefix Comparison
+### Appendix F: Multi-prefix Baseline
 
 ```bash
 python experiments/08_multi_prefix_experiment.py
 ```
 
-Reproduces Table 8: Multi-prefix vs. TCT-GRU 
-vs. Full-GRU. Note: ~50× slower than TCT 
-per update step.
+Reproduces Table 8: Multi-prefix simultaneous supervision vs TCT-GRU vs Full-GRU (5 seeds).
 
+**Note:** Multi-prefix requires ~50× more forward passes per update than TCT. Runtime per seed is approximately 3–4 hours on A100.
+
+---
 
 ## Expected Results (Table 1, Normal vs Emergency)
 
