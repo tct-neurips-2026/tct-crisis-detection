@@ -68,19 +68,25 @@ At each training step, we sample a random prefix length `t ~ Uniform(1, T)`
 and train on the truncated sequence. This aligns the training distribution
 with deployment conditions where only partial context is available.
 
-**DA-GRU oracle baseline:**
-
+**DA-GRU and DA-BERT (prefix-exhaustive baselines):**
 ```python
-# DA-GRU: expand each session into T independent prefix examples
+# DA-GRU/DA-BERT: expand each session into T
+# independent prefix examples
 for t in range(min_t, T + 1):
     loss = criterion(model(x_1_to_t), y)
     loss.backward()   # independent update per prefix
 ```
-
-DA-GRU deterministically covers all prefix lengths, establishing an empirical
-upper bound. Training is step-matched to TCT (~835 gradient updates) for fair
-comparison. DA-GRU requires ~47× more training examples and degrades at T=50,
-while TCT recovers 97% of its short-horizon gain at 1/47 the data cost.
+DA-GRU and DA-BERT deterministically cover all
+prefix lengths, establishing short-prefix upper
+bounds ($T{\leq}20$). Training is step-matched
+to their respective TCT variants for fair
+comparison. TCT's efficiency relative to these
+baselines is architecture-dependent: for
+sequential encoders (GRU), TCT recovers 97%
+of DA-GRU's short-horizon gain at 1/47 the
+data cost; for attention-based encoders (BERT),
+exhaustive coverage provides substantially
+larger gains.
 
 ---
 
