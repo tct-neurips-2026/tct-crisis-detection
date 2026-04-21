@@ -37,12 +37,13 @@ tct-crisis-detection/
 │   ├── 02_bert_experiment.py          # TCT-BERT, Full-BERT (klue/roberta-base)
 │   ├── 03_lora_experiment.py          # TCT-LoRA, Full-LoRA (r=8, ~0.5% params)
 │   ├── 04_llm_experiment.py           # TCT-LLM, Full-LLM (Qwen2.5-3B, QLoRA)
-│   ├── 05_scheduled_sampling.py       # Scheduled Sampling comparison (Appendix E)
+│   ├── 05_scheduled_sampling.py       # Scheduled Sampling comparison (Appendix F)
 │   ├── 06_curriculum_fixed.py         # Curriculum-GRU, Fixed-T5-GRU (Appendix C)
-│   ├── 07_qwen_05b_fp16.py            # Qwen2.5-0.5B fp16 ablation (Appendix D)
-│   ├── 08_multi_prefix_experiment.py  # Multi-prefix baseline (Appendix F)
-│   └── 09_da_gru_experiment.py        # DA-GRU oracle baseline (Appendix G)
-    └── 10_da_bert_experiment.py       # DA-BERT oracle (Appendix H)
+│   ├── 07_qwen_05b_fp16.py            # Qwen2.5-0.5B fp16 ablation (Appendix E)
+│   ├── 08_multi_prefix_experiment.py  # Multi-prefix baseline (Appendix G)
+│   ├── 09_da_gru_experiment.py        # DA-GRU baseline (Appendix H)
+│   ├── 10_da_bert_experiment.py       # DA-BERT baseline (Appendix I)
+│   └── 11_normal_vs_all.py            # All severity contrasts (Appendix D)
 ├── data/
 │   └── README.md                      # Data download instructions
 ├── requirements.txt
@@ -164,21 +165,31 @@ python experiments/06_curriculum_fixed.py
 Reproduces: Curriculum-GRU (deterministic difficulty schedule) and
 Fixed-T5-GRU (trains exclusively on T=5 prefixes).
 
-### Appendix D: Quantization Ablation
+### Appendix D: All Severity Contrasts
+```bash
+python experiments/11_normal_vs_all.py
+```
+Reproduces: TCT-GRU vs Full-GRU across all four binary contrasts
+(Normal vs. Observation, Counseling, Abuse-Suspected, Emergency).
+Shows TCT advantage is consistent across all severity levels
+(Δ = +0.170 to +0.190 at T=5), confirming results are not specific
+to the extreme binary contrast.
+
+### Appendix E: Quantization Ablation
 ```bash
 python experiments/07_qwen_05b_fp16.py
 ```
 Reproduces: Qwen2.5-0.5B in fp16 (no quantization) to confirm collapse
 is not a 4-bit artifact.
 
-### Appendix E: Scheduled Sampling Comparison
+### Appendix F: Scheduled Sampling Comparison
 ```bash
 python experiments/05_scheduled_sampling.py
 ```
 Reproduces: SS-Linear (linear ε decay) and SS-Exp (exponential ε decay)
 vs TCT-GRU and Full-GRU.
 
-### Appendix F: Multi-prefix Baseline
+### Appendix G: Multi-prefix Baseline
 ```bash
 python experiments/08_multi_prefix_experiment.py
 ```
@@ -188,26 +199,24 @@ Reproduces: Multi-prefix simultaneous supervision vs TCT-GRU vs Full-GRU
 **Note:** Multi-prefix requires ~50× more forward passes per update than TCT.
 Runtime per seed is approximately 3–4 hours on A100.
 
-### Appendix G: DA-GRU Oracle Baseline
+### Appendix H: DA-GRU Baseline
 ```bash
 python experiments/09_da_gru_experiment.py
 ```
 Reproduces: DA-GRU (step-matched, ~835 gradient updates, 47× data expansion)
-establishing an empirical upper bound on prefix-level exposure under the GRU
-architecture.
+establishing a short-prefix upper bound for sequential encoders (T≤20).
+TCT recovers 97% of DA-GRU's short-horizon gain at T=5, at 1/47 the data cost.
 
-### Appendix H: DA-BERT Oracle Baseline
+### Appendix I: DA-BERT Baseline
 ```bash
 python experiments/10_da_bert_experiment.py
 ```
-Reproduces: DA-BERT (step-matched,
-~1,336 gradient updates, 47× data expansion).
-Reveals that attention-based encoders
-require denser prefix coverage than
-stochastic sampling provides — TCT's
-efficiency advantage is
-architecture-dependent (strongest for
-sequential encoders).
+Reproduces: DA-BERT (step-matched, ~1,336 gradient updates, 47× data expansion).
+Reveals that attention-based encoders require denser prefix coverage than
+stochastic sampling provides — TCT's efficiency advantage is
+architecture-dependent (strongest for sequential encoders).
+
+**Note:** Training is step-matched to TCT for fair comparison.
 
 **Key result:** TCT recovers 97% of the DA-GRU upper
 bound at 1/47 the data cost for sequential
