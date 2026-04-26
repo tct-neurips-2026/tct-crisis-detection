@@ -12,7 +12,8 @@ The dataset is freely available at:
 https://aihub.or.kr/aihubdata/data/view.do?dataSetSn=71680
 ```
 
-Note: Registration on the AI Hub platform is required for download. The dataset is available to Korean citizens and affiliated researchers.
+Note: Registration on the AI Hub platform
+is required for download.
 
 ### Dataset Statistics
 
