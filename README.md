@@ -2,29 +2,23 @@
 
 Anonymous submission to NeurIPS 2026
 
+---
+
 ## Overview
 
-Standard sequential models are trained on
-complete sessions but deployed on partial
-prefixes — a systematic mismatch that causes
-catastrophic performance collapse at early
-turns. This repository provides code to
-reproduce all experiments from the paper.
+Standard sequential models are trained on complete sessions but deployed on
+partial prefixes — a systematic mismatch that causes catastrophic performance
+collapse at early turns. This repository provides code to reproduce all
+experiments from the paper.
 
-**Key finding:** A 3B LLM trained on
-complete counseling sessions collapses to
-AUC = 0.602 at five turns — worse than a
-simple GRU (0.684). The fix is a single
-line: sample `t ~ Uniform(1, T)` at each
-training step. TCT's efficiency relative
-to exhaustive prefix augmentation is
-architecture-dependent: for sequential
-encoders (GRU), TCT recovers 97% of the
-DA-GRU upper bound at 1/47 the data cost;
-for attention-based encoders (BERT),
-exhaustive coverage provides substantially
-larger gains (DA-BERT: 0.912 vs.
-TCT-BERT: 0.737 at T=5).
+**Key finding:** A 3B LLM trained on complete counseling sessions collapses to
+AUC = 0.602 at five turns — worse than a simple GRU (0.684). The fix is a
+single line: sample `t ~ Uniform(1, T)` at each training step. TCT's efficiency
+relative to exhaustive prefix augmentation is architecture-dependent: for
+sequential encoders (GRU), TCT recovers 97% of the DA-GRU short-prefix upper
+bound at 1/47 the data cost; for attention-based encoders (BERT), exhaustive
+coverage provides substantially larger gains (DA-BERT: 0.912 vs. TCT-BERT:
+0.737 at T=5).
 
 ---
 
@@ -70,6 +64,7 @@ and train on the truncated sequence. This aligns the training distribution
 with deployment conditions where only partial context is available.
 
 **DA-GRU and DA-BERT (prefix-exhaustive baselines):**
+
 ```python
 # DA-GRU/DA-BERT: expand each session into T
 # independent prefix examples
@@ -77,16 +72,14 @@ for t in range(min_t, T + 1):
     loss = criterion(model(x_1_to_t), y)
     loss.backward()   # independent update per prefix
 ```
-DA-GRU and DA-BERT deterministically cover all
-prefix lengths, establishing short-prefix upper
-bounds ($T{\leq}20$). Training is step-matched
-to their respective TCT variants for fair
-comparison. TCT's efficiency relative to these
-baselines is architecture-dependent: for
-sequential encoders (GRU), TCT recovers 97%
-of DA-GRU's short-horizon gain at 1/47 the
-data cost; for attention-based encoders (BERT),
-exhaustive coverage provides substantially
+
+DA-GRU and DA-BERT deterministically cover all prefix lengths, establishing
+short-prefix upper bounds (T≤20). Training is step-matched to their respective
+TCT variants for fair comparison — specifically, we match gradient updates
+rather than epochs, since DA datasets are ~47× larger. TCT's efficiency
+relative to these baselines is architecture-dependent: for sequential encoders
+(GRU), TCT recovers 97% of DA-GRU's short-horizon gain at 1/47 the data cost;
+for attention-based encoders (BERT), exhaustive coverage provides substantially
 larger gains.
 
 ---
@@ -120,7 +113,7 @@ pip install -r requirements.txt
 
 ---
 
-## Reproducing Main Results (Tables 1 & 2)
+## Reproducing Main Results (Tables 2 & 3)
 
 ### Step 1: GRU experiments (~2 hours on A100)
 ```bash
@@ -211,21 +204,15 @@ TCT recovers 97% of DA-GRU's short-horizon gain at T=5, at 1/47 the data cost.
 ```bash
 python experiments/10_da_bert_experiment.py
 ```
-Reproduces: DA-BERT (step-matched, ~1,336 gradient updates, 47× data expansion).
-Reveals that attention-based encoders require denser prefix coverage than
-stochastic sampling provides — TCT's efficiency advantage is
-architecture-dependent (strongest for sequential encoders).
+Reproduces: DA-BERT (step-matched, ~1,336 gradient updates, 47× data
+expansion). Reveals that attention-based encoders require denser prefix
+coverage than stochastic sampling provides — TCT's efficiency advantage
+is architecture-dependent (strongest for sequential encoders).
 
-**Note:** Training is step-matched to TCT for fair comparison.
-
-**Key result:** TCT recovers 97% of the DA-GRU upper
-bound at 1/47 the data cost for sequential
-encoders; efficiency is architecture- dependent 
-(DA-BERT shows a larger gap to TCT-BERT).
-
-**Note:** Training is step-matched to TCT for fair comparison. DA-GRU expands
-each session into T independent prefix examples; one pass through the expanded
-dataset (~49,778 examples) corresponds to ~47× the original session count.
+**Note:** Training is step-matched to TCT for fair comparison. DA-GRU/DA-BERT
+expand each session into T independent prefix examples; one pass through the
+expanded dataset (~49,778 examples) corresponds to ~47× the original session
+count.
 
 ---
 
@@ -233,17 +220,26 @@ dataset (~49,778 examples) corresponds to ~47× the original session count.
 
 ### Main experiment (Table 2, Normal vs. Emergency)
 
-| T  | TCT-GRU      | Full-GRU     | DA-GRU       | Multi-prefix | Δ      |
-|----|--------------|--------------|--------------|--------------|--------|
-| 5  | .860 ± .034  | .684 ± .007  | .904 ± .006  | .861 ± .019  | +.176  |
-| 10 | .918 ± .018  | .830 ± .007  | .944 ± .002  | .917 ± .013  | +.087  |
-| 15 | .942 ± .013  | .906 ± .006  | .956 ± .001  | .941 ± .011  | +.037  |
-| 20 | .951 ± .013  | .908 ± .002  | .961 ± .002  | .950 ± .010  | +.043  |
-| 30 | .974 ± .005  | .970 ± .001  | .975 ± .002  | .972 ± .004  | +.004  |
-| 50 | .985 ± .001  | .993 ± .000  | .976 ± .003  | .985 ± .001  | -.008  |
+| T  | TCT-GRU      | Full-GRU     | DA-GRU       | DA-BERT      | MP           | Δ      |
+|----|-------------|-------------|-------------|-------------|-------------|--------|
+| 5  | .860 ± .034 | .684 ± .007 | .904 ± .006 | .912 ± .007 | .861 ± .019 | +.176  |
+| 10 | .918 ± .018 | .830 ± .007 | .944 ± .002 | .950 ± .005 | .917 ± .013 | +.087  |
+| 15 | .942 ± .013 | .906 ± .006 | .956 ± .001 | .965 ± .008 | .941 ± .011 | +.037  |
+| 20 | .951 ± .013 | .908 ± .002 | .961 ± .002 | .963 ± .008 | .950 ± .010 | +.043  |
+| 30 | .974 ± .005 | .970 ± .001 | .975 ± .002 | .977 ± .004 | .972 ± .004 | +.004  |
+| 50 | .985 ± .001 | .993 ± .000 | .976 ± .003 | .981 ± .002 | .985 ± .001 | -.008  |
 
-DA-GRU = oracle upper bound (step-matched, 47× data).
+DG = DA-GRU; DB = DA-BERT (step-matched prefix-exhaustive baselines).
 Δ = TCT-GRU − Full-GRU.
+
+### Severity contrast robustness (Appendix D)
+
+| Contrast               | TCT T=5 | Full T=5 | Δ T=5  |
+|------------------------|---------|----------|--------|
+| Normal vs Observation  | 0.745   | 0.571    | +0.174 |
+| Normal vs Counseling   | 0.786   | 0.596    | +0.190 |
+| Normal vs Abuse-Sus.   | 0.873   | 0.703    | +0.170 |
+| Normal vs Emergency    | 0.860   | 0.684    | +0.176 |
 
 ---
 
@@ -260,20 +256,28 @@ All experiments were run on a single NVIDIA A100 GPU (40GB).
 
 Approximate runtimes per seed:
 
-| Model          | Runtime/seed |
-|----------------|-------------|
-| GRU            | ~25 min     |
-| BERT           | ~50 min     |
-| LoRA           | ~40 min     |
-| LLM (QLoRA)    | ~90 min     |
-| DA-GRU         | ~30 min     |
-| Multi-prefix   | ~180 min    |
-| DA-BERT        | ~25 min     |
+| Model              | Runtime/seed |
+|--------------------|-------------|
+| GRU                | ~25 min     |
+| BERT               | ~50 min     |
+| LoRA               | ~40 min     |
+| LLM (QLoRA)        | ~90 min     |
+| DA-GRU             | ~30 min     |
+| DA-BERT            | ~25 min     |
+| Multi-prefix       | ~180 min    |
+| All contrasts (11) | ~120 min    |
+
 ---
 
 ## Citation
 
 Anonymous submission. Under review at NeurIPS 2026.
+
+---
+
+## License
+
+MIT License (code only). Data subject to AI Hub terms of use.
 
 ---
 
