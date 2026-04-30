@@ -15,7 +15,7 @@ experiments from the paper.
 AUC = 0.602 at five turns — worse than a simple GRU (0.684). The fix is a
 single line: sample `t ~ Uniform(1, T)` at each training step. TCT's efficiency
 relative to exhaustive prefix augmentation is architecture-dependent: for
-sequential encoders (GRU), TCT recovers 97% of the DA-GRU short-prefix upper
+sequential encoders (GRU), TCT recovers 80% of the DA-GRU short-prefix upper
 bound at 1/47 the data cost; for attention-based encoders (BERT), exhaustive
 coverage provides substantially larger gains (DA-BERT: 0.912 vs. TCT-BERT:
 0.737 at T=5).
