@@ -209,6 +209,18 @@ expansion). Reveals that attention-based encoders require denser prefix
 coverage than stochastic sampling provides — TCT's efficiency advantage
 is architecture-dependent (strongest for sequential encoders).
 
+### Appendix J: Non-sequential Baseline Full Results
+```bash
+python experiments/01_gru_experiment.py
+```
+Reproduces: Mean-pool and Last-turn baselines (prefix-averaged and
+single final-turn embeddings with logistic regression) vs. TCT-GRU
+and Full-GRU (5 seeds). Last-turn performance declines monotonically
+from T=5 to T=30 (0.775 to 0.636), consistent with mid-session turns
+carrying least discriminative signal.
+
+
+
 **Note:** Training is step-matched to TCT for fair comparison. DA-GRU/DA-BERT
 expand each session into T independent prefix examples; one pass through the
 expanded dataset (~49,778 examples) corresponds to ~47× the original session
