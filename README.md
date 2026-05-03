@@ -16,7 +16,7 @@ The fix is a single line: sample
 `t ~ Uniform(1, T)` at each training step.
 TCT's efficiency relative to exhaustive prefix
 augmentation is architecture-dependent: for
-sequential encoders (GRU), TCT recovers 80% of
+sequential encoders (GRU), TCT recovers approximately 80% of
 the DA-GRU short-prefix upper bound at 1/47 the
 data cost; for attention-based encoders (BERT),
 exhaustive coverage provides substantially larger
@@ -80,7 +80,7 @@ short-prefix upper bounds (T≤20). Training is step-matched to their respective
 TCT variants for fair comparison — specifically, we match gradient updates
 rather than epochs, since DA datasets are ~47× larger. TCT's efficiency
 relative to these baselines is architecture-dependent: for sequential encoders
-(GRU), TCT recovers 97% of DA-GRU's short-horizon gain at 1/47 the data cost;
+(GRU), TCT recovers approximately 80% of DA-GRU's short-horizon gain at 1/47 the data cost;
 for attention-based encoders (BERT), exhaustive coverage provides substantially
 larger gains.
 
@@ -200,7 +200,7 @@ python experiments/09_da_gru_experiment.py
 ```
 Reproduces: DA-GRU (step-matched, ~835 gradient updates, 47× data expansion)
 establishing a short-prefix upper bound for sequential encoders (T≤20).
-TCT recovers 97% of DA-GRU's short-horizon gain at T=5, at 1/47 the data cost.
+TCT recovers approximately 80% of DA-GRU's short-horizon gain at T=5, at 1/47 the data cost.
 
 ### Appendix I: DA-BERT Baseline
 ```bash
@@ -294,7 +294,3 @@ Anonymous submission. Under review at NeurIPS 2026.
 MIT License (code only). Data subject to AI Hub terms of use.
 
 ---
-
-## License
-
-MIT License (code only). Data subject to AI Hub terms of use.
